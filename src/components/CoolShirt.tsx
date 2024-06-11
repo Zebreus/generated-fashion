@@ -1,15 +1,16 @@
 import { usePageTransitionsAvailable } from "hooks/usePageTransitionsAvailable"
+import { useShirtWorker } from "hooks/useShirtWorker"
 import dynamic from "next/dynamic"
 import { useEffect, useState } from "react"
 
 let globalLoaded = false
 const informLoaded: Array<(state: boolean) => void> = []
-const Shirt = dynamic(
+const OffscreenShirt = dynamic(
   () =>
     import("react-3d-shirt").then(i => {
       globalLoaded = true
       informLoaded.forEach(cb => cb(true))
-      return i.Shirt
+      return i.OffscreenShirt
     }),
   {
     suspense: false,
@@ -28,6 +29,7 @@ type CoolShirtProps = {
 export const CoolShirt = ({ url, fallback, noMovement, onlyImage, color }: CoolShirtProps) => {
   const [clientside, setClientside] = useState(typeof window !== "undefined")
   const [loaded, setLoaded] = useState(globalLoaded)
+  const worker = useShirtWorker(!!onlyImage)
   useEffect(() => {
     informLoaded.push(setLoaded)
     return () => {
@@ -42,7 +44,7 @@ export const CoolShirt = ({ url, fallback, noMovement, onlyImage, color }: CoolS
     <img
       src={fallback}
       alt="placeholder"
-      style={{ objectFit: "contain", height: "100%", width: "auto", margin: "auto" }}
+      style={{ objectFit: "cover", height: "100%", width: "auto", marginLeft: "auto", marginRight: "auto" }}
     />
   ) : (
     <div style={{ height: "100%", width: "100%" }}></div>
@@ -55,13 +57,14 @@ export const CoolShirt = ({ url, fallback, noMovement, onlyImage, color }: CoolS
       {clientside && !onlyImage ? (
         <>
           {loaded ? null : fallbackElement}
-          <Shirt
+          <OffscreenShirt
+            worker={worker}
             motif={url}
             color={color ?? `white`}
             coverLoading={!!fallback}
             cover={fallback ? fallbackElement : null}
             {...(noMovement ? { wobbleRange: 0, wobbleSpeed: 0 } : {})}
-            renderDelay={pageTransitionsAvailable ? 400 : 0}
+            renderDelay={pageTransitionsAvailable ? 0 : 0}
           />
         </>
       ) : (

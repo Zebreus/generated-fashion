@@ -1,4 +1,3 @@
-import { ShirtPrint } from "components/ShirtPrint"
 import { WithRef } from "hooks/firestore/FirestoreDocument"
 import { usePrediction } from "hooks/firestore/simple/usePrediction"
 import { getSatori, useSatori } from "hooks/useSatori"
@@ -23,12 +22,7 @@ export const useMotifUrl = (predictionId?: string, options?: { small?: boolean }
     [scale]
   )
 
-  const shirtNode = useMemo(
-    () => (prediction ? <ShirtPrint shirt={prediction} height={height * dpi} width={width * dpi} /> : undefined),
-    [prediction]
-  )
-
-  const svg = useSatori(shirtNode, satoriOptions)
+  const svg = useSatori(prediction, satoriOptions)
 
   return svg
 }
@@ -46,8 +40,6 @@ export const getMotifUrl = async (prediction?: WithRef<Prediction>, options?: { 
     scale: scale,
   }
 
-  const shirtNode = prediction ? <ShirtPrint shirt={prediction} height={height * dpi} width={width * dpi} /> : undefined
-
-  const svg = await getSatori(shirtNode, satoriOptions)
+  const svg = await getSatori(prediction, satoriOptions)
   return svg
 }
